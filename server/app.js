@@ -4,17 +4,25 @@ const mongoose = require("mongoose");
 
 const schema = require("./src/graphql/schema");
 const resolvers = require("./src/graphql/resolvers");
+const isAuth = require("./src/middleware/is-auth");
 
 const app = express();
 
 app.use(express.json());
+app.use(isAuth);
 
 app.use(
   "/api/graphql/v1",
   graphqlHTTP({
     schema,
     rootValue: resolvers,
-    graphiql: true,
+    graphiql: { headerEditorEnabled: true },
+    customFormatErrorFn: err => {
+      return {
+        message: err.message,
+        code: (err.originalError && err.originalError.code) || 500,
+      };
+    },
   })
 );
 
