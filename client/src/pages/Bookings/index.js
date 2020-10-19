@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 
+import "./styles.css";
 import { getLocalStorage } from "utils/local-storage";
+import BookingList from "components/Bookings/BookingList";
 
 export default function Bookings() {
   const token = getLocalStorage()?.token;
@@ -8,7 +10,7 @@ export default function Bookings() {
     isLoading: false,
     bookings: [],
   });
-  const { isLoading, bookings } = state;
+  const { isLoading } = state;
 
   useEffect(() => {
     let isMounted = true;
@@ -72,14 +74,7 @@ export default function Bookings() {
 
   if (isLoading) return "Loading...";
 
-  return (
-    <ul>
-      {bookings.map(booking => (
-        <li key={booking._id}>
-          {booking.event.title} -
-          {new Date(+booking.createdAt).toLocaleDateString()}
-        </li>
-      ))}
-    </ul>
-  );
+  if (!state.bookings.length) return "No bookings";
+
+  return <BookingList state={state} setState={setState} />;
 }
