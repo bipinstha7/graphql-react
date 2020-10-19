@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useHistory } from "react-router-dom";
 
 import "./styles.css";
 import Modal from "components/Modal";
@@ -10,15 +11,54 @@ const showDate = date => {
 };
 
 export default function EventItem({ event }) {
-  const id = getLocalStorage()?.id;
+  const localData = getLocalStorage() || {};
+  const { id, token } = localData;
+  const history = useHistory();
   const { title, description, price, date, creator } = event;
   const [detailsModal, setDetailsModal] = useState(false);
+  const [error, setError] = useState("");
 
   const showDetails = () => {
     setDetailsModal(modal => !modal);
   };
 
-  const bookEvent = () => {};
+  const bookEvent = async () => {
+    const payload = {
+      query: `
+          mutation {
+            bookEvent(eventId: "${event._id}") {
+              _id
+              createdAt
+              updatedAt
+            }
+          }
+        `,
+    };
+
+    try {
+      let res = await fetch("http://localhost:5000/api/graphql/v1", {
+        method: "POST",
+        body: JSON.stringify(payload),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token,
+        },
+      });
+
+      res = await res.json();
+
+      if (res.errors) {
+        throw res.errors[0].message;
+      }
+
+      console.log({ res });
+
+      history.push("/bookings");
+    } catch (error) {
+      console.log({ onSubmitError: error });
+      setError(error);
+    }
+  };
 
   return (
     <>
@@ -27,7 +67,7 @@ export default function EventItem({ event }) {
           <Backdrop />
           <Modal
             canCancel
-            canConfirm
+            canConfirm={token}
             onCancel={showDetails}
             onConfirm={bookEvent}
             confirmText="Book"
@@ -48,8 +88,7 @@ export default function EventItem({ event }) {
           </h2>
         </div>
         <div>
-          {creator._id} - {id}
-          {creator._id === id ? (
+          {creator._id !== id ? (
             <button className="btn" onClick={showDetails}>
               View Details
             </button>

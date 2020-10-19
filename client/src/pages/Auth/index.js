@@ -16,11 +16,13 @@ export default function Auth() {
 
   const [isLogin, setIsLogin] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const { dispatch } = useContext(AuthContext);
 
   const onSubmit = async e => {
     e.preventDefault();
+    setError("");
 
     const email = emailRef.current.value;
     const password = passwordRef.current.value;
@@ -70,23 +72,35 @@ export default function Auth() {
 
       res = await res.json();
 
+      if (res.errors) {
+        throw res.errors[0].message;
+      }
+
       console.log({ res });
 
-      const token = res.data.login.token;
-      if (token) {
-        const { _id, exp } = jwtDecode(token);
-        setIsLoading(false);
+      setIsLoading(false);
+      if (isLogin) {
+        const token = res.data.login.token;
+        if (token) {
+          const { _id, exp } = jwtDecode(token);
 
-        const payload = {
-          token,
-          id: _id,
-          exp,
-        };
-        localStorage.setItem("eventy-token", JSON.stringify(payload));
-        dispatch({ type: "SET_AUTH_TOKEN", payload: { _id, exp, token } });
+          const payload = {
+            token,
+            id: _id,
+            exp,
+          };
+          localStorage.setItem("eventy-token", JSON.stringify(payload));
+          dispatch({ type: "SET_AUTH_TOKEN", payload: { _id, exp, token } });
+        }
+      } else {
+        const userCreated = res.data.createUser;
+        if (userCreated) {
+          setIsLogin(true);
+        }
       }
     } catch (error) {
       setIsLoading(false);
+      setError(error);
       console.log({ onSubmitError: error });
     }
   };
@@ -119,6 +133,8 @@ export default function Auth() {
         <button type="button" onClick={switchModeHandler} disabled={isLoading}>
           Switch to {isLogin ? "Signup" : "Sign in"}
         </button>
+
+        {error ? <p>{error}</p> : null}
       </div>
     </form>
   );

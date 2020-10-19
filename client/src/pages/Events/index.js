@@ -54,6 +54,7 @@ export default function Events() {
           `,
     };
 
+    let isMounted = true;
     try {
       setState(state => ({ ...state, isLoading: true }));
       let res = await fetch("http://localhost:5000/api/graphql/v1", {
@@ -72,15 +73,21 @@ export default function Events() {
         throw res.errors[0];
       }
 
-      setState(state => ({
-        ...state,
-        isLoading: false,
-        events: res.data.events,
-      }));
+      if (isMounted) {
+        setState(state => ({
+          ...state,
+          isLoading: false,
+          events: res.data.events,
+        }));
+      }
     } catch (error) {
-      setState(state => ({ ...state, isLoading: false }));
+      if (isMounted) {
+        setState(state => ({ ...state, isLoading: false }));
+      }
       console.log({ onSubmitError: error });
     }
+
+    return () => (isMounted = false);
   }, []);
 
   useEffect(() => {
