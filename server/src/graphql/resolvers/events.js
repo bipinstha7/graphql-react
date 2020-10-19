@@ -40,10 +40,10 @@ module.exports = {
         description,
         price,
         date,
-        creator: "5f8821fa7e0d60890009f359",
+        creator: req.currentUser,
       });
 
-      const user = await User.findOne({ _id: creator });
+      const user = await User.findOne({ _id: req.currentUser });
 
       if (!user) {
         throw CustomError("User not found", 404);
