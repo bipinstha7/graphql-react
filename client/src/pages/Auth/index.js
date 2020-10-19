@@ -75,10 +75,16 @@ export default function Auth() {
       const token = res.data.login.token;
       if (token) {
         const { _id, exp } = jwtDecode(token);
+        setIsLoading(false);
 
+        const payload = {
+          token,
+          id: _id,
+          exp,
+        };
+        localStorage.setItem("eventy-token", JSON.stringify(payload));
         dispatch({ type: "SET_AUTH_TOKEN", payload: { _id, exp, token } });
       }
-      setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
       console.log({ onSubmitError: error });

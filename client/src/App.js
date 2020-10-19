@@ -8,10 +8,11 @@ import Events from "pages/Events";
 import MainNavigation from "components/Navigation/MainNavigation";
 import AuthContext from "context/auth-context";
 import { initialState, reducer } from "reducer/auth-reducer";
+import { getLocalStorage } from "utils/local-storage";
 
 function App() {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { token } = state;
+  const token = getLocalStorage()?.token;
 
   return (
     <BrowserRouter>
