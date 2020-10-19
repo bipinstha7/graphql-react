@@ -37,7 +37,8 @@ module.exports = {
       throw CustomError("Unauthorized", 401);
     }
 
-    const { userId, eventId } = args;
+    const userId = req.currentUser;
+    const { eventId } = args;
 
     const findEvent = Event.findOne({ _id: eventId });
     const findUser = User.findOne({ _id: userId });
