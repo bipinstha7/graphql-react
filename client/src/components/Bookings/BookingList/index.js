@@ -8,10 +8,25 @@ export default function BookingList({ state, setState }) {
   const token = getLocalStorage()?.token;
 
   const cancelBooking = async bookingId => {
+    // const payload = {
+    //   query: `
+    //     mutation {
+    //       cancelBooking(bookingId: "${bookingId}") {
+    //         _id
+    //         event {
+    //           title
+    //         }
+    //       }
+    //     }
+    //   `,
+    // };
+
+    /* Another approach */
+
     const payload = {
       query: `
-        mutation {
-          cancelBooking(bookingId: "${bookingId}") {
+        mutation CancelBooking($id: ID!) {
+          cancelBooking(bookingId: $id) {
             _id
             event {
               title
@@ -19,6 +34,9 @@ export default function BookingList({ state, setState }) {
           }
         }
       `,
+      variables: {
+        id: bookingId,
+      },
     };
 
     try {
