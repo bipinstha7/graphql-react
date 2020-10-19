@@ -15,7 +15,7 @@ module.exports = {
     }
 
     try {
-      return await Booking.find()
+      return await Booking.find({ user: req.currentUser })
         .populate({
           path: "event",
           populate: { path: "creator" },
